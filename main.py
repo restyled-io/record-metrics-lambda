@@ -5,7 +5,8 @@ import json
 
 
 def handler(_event, _context):
-    env = os.environ.get('ENV', 'dev')
+    # TODO: record for any deployed environments
+    env = os.environ.get('ENV', 'prod')
 
     def add_env_dimension(metric):
         env_dimension = {'Name': 'Environment', 'Value': env}
