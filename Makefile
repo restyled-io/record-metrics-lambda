@@ -13,5 +13,5 @@ dist/lambda.zip: main.py
 	rm -rf dist/*
 	mkdir -p dist
 	cp main.py dist/
-	cp -r .venv/lib/python3.8/site-packages/* dist/
+	cp -r .venv/lib/python*/site-packages/* dist/
 	cd dist && zip -r lambda.zip .
