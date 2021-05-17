@@ -33,7 +33,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-      - run: make setup dist/lambda.zip
+      - run: pip install -r requirements.txt
+      - run: |
+          mkdir -p dist
+          cp -r "$(python -m site --user-site)"/* dist/
+          cp main.py dist/
+          cd dist && zip -r lambda.zip .
       - id: artifact
         run: |
           key=src/record-metrics/${{ github.sha }}.zip
