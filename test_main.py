@@ -4,11 +4,6 @@ import warnings
 import main
 
 
-class FakeContext:
-    def vars(self):
-        return {"foo": "bar"}
-
-
 class TestMain(unittest.TestCase):
     def setUp(self):
         # https://github.com/boto/boto3/issues/454
@@ -20,7 +15,7 @@ class TestMain(unittest.TestCase):
                                 message="ssl.*")
 
     def test_handler(self):
-        result = main.handler({}, FakeContext())
+        result = main.handler(None, None)
         self.assertEqual(result['ok'], True)
         self.assertEqual(result['env'], 'prod')
 

@@ -17,7 +17,6 @@ def copy_event_to_message(_logger, _log_method, event_dict):
 
 def get_logger(log_level_str):
     processors = [
-        structlog.threadlocal.merge_threadlocal,
         structlog.processors.add_log_level,
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
@@ -41,10 +40,7 @@ def get_logger(log_level_str):
     return structlog.get_logger()
 
 
-def handler(_event, context):
-    structlog.threadlocal.clear_threadlocal()
-    structlog.threadlocal.bind_threadlocal(**context.vars())
-
+def handler(_event, _context):
     env = os.environ.get('ENV', 'prod')
     queue = os.environ.get('QUEUE', 'restyled:agent:webhooks')
     log_level = os.environ.get('LOG_LEVEL', 'info')
