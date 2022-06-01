@@ -1,37 +1,68 @@
 import json
+import logging
 import os
+import sys
 
 import boto3
 import redis
 import requests
+import structlog
+
+
+def extend_event(_logger, log_method, event_dict):
+    event_dict['level'] = log_method
+    event_dict['message'] = event_dict['event']
+    event_dict.pop('event')
+
+    return event_dict
+
+
+logging.basicConfig(format="%(message)s",
+                    stream=sys.stdout,
+                    level=logging.INFO)
+
+structlog.configure(
+    processors=[extend_event,
+                structlog.processors.JSONRenderer()],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+)
 
 
 def handler(_event, _context):
-    # TODO: record for any deployed environments/queues
-    env = os.environ.get('ENV', 'prod')
-    queue = os.environ.get('QUEUE', 'restyled:agent:webhooks')
-    dimensions = [{
-        'Name': 'Environment',
-        'Value': env
-    }, {
-        'Name': 'QueueName',
-        'Value': queue
-    }]
+    try:
+        # TODO: record for any deployed environments/queues
+        env = os.environ.get('ENV', 'prod')
+        queue = os.environ.get('QUEUE', 'restyled:agent:webhooks')
 
-    url = get_redis_url(env)
-    r = redis.Redis.from_url(url)
-    depth = r.llen(queue)
+        logger = structlog.get_logger("record-metrics")
+        logger.info("Recording metrics", env=env, queue=queue)
 
-    cw = boto3.client('cloudwatch')
-    cw.put_metric_data(Namespace='Restyled',
-                       MetricData=[{
-                           'MetricName': 'QueueDepth',
-                           'Value': depth,
-                           'Unit': 'Count',
-                           'Dimensions': dimensions
-                       }])
+        dimensions = [{
+            'Name': 'Environment',
+            'Value': env
+        }, {
+            'Name': 'QueueName',
+            'Value': queue
+        }]
 
-    return {'ok': True, 'env': env, 'queue': queue, 'depth': depth}
+        url = get_redis_url(env)
+        r = redis.Redis.from_url(url)
+        depth = r.llen(queue)
+
+        cw = boto3.client('cloudwatch')
+        cw.put_metric_data(Namespace='Restyled',
+                           MetricData=[{
+                               'MetricName': 'QueueDepth',
+                               'Value': depth,
+                               'Unit': 'Count',
+                               'Dimensions': dimensions
+                           }])
+
+        return {'ok': True, 'env': env, 'queue': queue, 'depth': depth}
+    except Exception as ex:
+        logger.error("Exception", exception=ex)
+
+        return {'ok': False, 'env': env, 'queue': queue}
 
 
 def get_redis_url(env):
