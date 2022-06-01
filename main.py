@@ -9,45 +9,65 @@ import requests
 import structlog
 
 
-def extend_event(_logger, log_method, event_dict):
-    event_dict['level'] = log_method
+def copy_event_to_message(_logger, _log_method, event_dict):
     event_dict['message'] = event_dict['event']
-    event_dict.pop('event')
 
     return event_dict
 
 
-logging.basicConfig(format="%(message)s",
-                    stream=sys.stdout,
-                    level=logging.INFO)
+def get_logger(log_level_str):
+    processors = [
+        structlog.threadlocal.merge_threadlocal,
+        structlog.processors.add_log_level,
+        structlog.processors.format_exc_info,
+        structlog.processors.TimeStamper(),
+        structlog.processors.CallsiteParameterAdder(), copy_event_to_message,
+        structlog.processors.JSONRenderer()
+    ]
 
-structlog.configure(
-    processors=[extend_event,
-                structlog.processors.JSONRenderer()],
-    logger_factory=structlog.stdlib.LoggerFactory(),
-)
+    log_level = {
+        'critical': logging.CRITICAL,
+        'error': logging.ERROR,
+        'warning': logging.WARNING,
+        'info': logging.INFO,
+        'debug': logging.DEBUG
+    }.get(log_level_str.lower())
+
+    structlog.configure(
+        processors=processors,
+        wrapper_class=structlog.make_filtering_bound_logger(log_level),
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=False)
+
+    return structlog.get_logger()
 
 
-def handler(_event, _context):
+def handler(_event, context):
+    structlog.threadlocal.clear_threadlocal()
+    structlog.threadlocal.bind_threadlocal(**context)
+
+    env = os.environ.get('ENV', 'prod')
+    queue = os.environ.get('QUEUE', 'restyled:agent:webhooks')
+    log_level = os.environ.get('LOG_LEVEL', 'info')
+    logger = get_logger(log_level)
+    dimensions = [{
+        'Name': 'Environment',
+        'Value': env
+    }, {
+        'Name': 'QueueName',
+        'Value': queue
+    }]
+
     try:
-        # TODO: record for any deployed environments/queues
-        env = os.environ.get('ENV', 'prod')
-        queue = os.environ.get('QUEUE', 'restyled:agent:webhooks')
-
-        logger = structlog.get_logger("record-metrics")
-        logger.info("Recording metrics", env=env, queue=queue)
-
-        dimensions = [{
-            'Name': 'Environment',
-            'Value': env
-        }, {
-            'Name': 'QueueName',
-            'Value': queue
-        }]
-
         url = get_redis_url(env)
         r = redis.Redis.from_url(url)
         depth = r.llen(queue)
+
+        logger.info('Putting depth metric',
+                    app='record-metrics',
+                    env=env,
+                    queue=queue,
+                    depth=depth)
 
         cw = boto3.client('cloudwatch')
         cw.put_metric_data(Namespace='Restyled',
@@ -59,8 +79,8 @@ def handler(_event, _context):
                            }])
 
         return {'ok': True, 'env': env, 'queue': queue, 'depth': depth}
-    except Exception as ex:
-        logger.error("Exception", exception=ex)
+    except:
+        logger.error("Exception", exc_info=True)
 
         return {'ok': False, 'env': env, 'queue': queue}
 

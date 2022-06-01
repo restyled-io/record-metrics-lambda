@@ -15,7 +15,7 @@ class TestMain(unittest.TestCase):
                                 message="ssl.*")
 
     def test_handler(self):
-        result = main.handler(None, None)
+        result = main.handler({}, {"context": "variable"})
         self.assertEqual(result['ok'], True)
         self.assertEqual(result['env'], 'prod')
 
