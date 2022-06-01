@@ -9,7 +9,7 @@ import requests
 def handler(_event, _context):
     # TODO: record for any deployed environments/queues
     env = os.environ.get('ENV', 'prod')
-    queue = os.environ.get('QUEUE', 'restyled:hooks:webhooks')
+    queue = os.environ.get('QUEUE', 'restyled:agent:webhooks')
     dimensions = [{
         'Name': 'Environment',
         'Value': env
