@@ -43,7 +43,7 @@ def get_logger(log_level_str):
 
 def handler(_event, context):
     structlog.threadlocal.clear_threadlocal()
-    structlog.threadlocal.bind_threadlocal(**context)
+    structlog.threadlocal.bind_threadlocal(**context.vars())
 
     env = os.environ.get('ENV', 'prod')
     queue = os.environ.get('QUEUE', 'restyled:agent:webhooks')
