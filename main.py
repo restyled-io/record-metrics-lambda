@@ -19,6 +19,7 @@ def get_logger(log_level_str):
     processors = [
         structlog.threadlocal.merge_threadlocal,
         structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
         structlog.processors.TimeStamper(),
         structlog.processors.CallsiteParameterAdder(), copy_event_to_message,
@@ -35,9 +36,7 @@ def get_logger(log_level_str):
 
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(log_level),
-        logger_factory=structlog.PrintLoggerFactory(),
-        cache_logger_on_first_use=False)
+        wrapper_class=structlog.make_filtering_bound_logger(log_level))
 
     return structlog.get_logger()
 
