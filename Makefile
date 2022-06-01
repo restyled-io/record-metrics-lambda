@@ -7,7 +7,7 @@ setup:
 
 .PHONY: test
 test:
-	. .venv/bin/activate && AWS_PROFILE=restyled-ci ENV=test python test_main.py
+	. .venv/bin/activate && AWS_PROFILE=restyled-ci python test_main.py
 
 dist/lambda.zip: main.py
 	rm -rf dist/*
