@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+from urllib.parse import urlparse
 
 import boto3
 import redis
@@ -55,7 +56,14 @@ def handler(_event, _context):
 
     try:
         url = get_redis_url(env)
-        r = redis.Redis.from_url(url)
+
+        if url.scheme == "rediss":
+            r = redis.Redis(host=url.hostname, port=url.port,
+                            password=url.password, ssl=True, ssl_cert_reqs=None)
+        else:
+            r = redis.Redis(host=url.hostname, port=url.port,
+                            password=url.password)
+
         depth = r.llen(queue)
 
         logger.info('Putting depth metric',
@@ -85,7 +93,7 @@ def get_redis_url(env):
     token_parameter_name = "/restyled/%s/redis-url" % env
     token_parameter = ssm.get_parameter(Name=token_parameter_name)
 
-    return token_parameter['Parameter']['Value']
+    return urlparse(token_parameter['Parameter']['Value'])
 
 
 if __name__ == '__main__':
