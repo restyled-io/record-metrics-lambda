@@ -9,7 +9,9 @@ TEST_REDIS_URL = "http://redis.restyled.com:6379/1"
 
 
 class TestMain(unittest.TestCase):
+    """ """
     def test_handler(self):
+        """ """
         aws = MockAWS()
         aws.ssm_parameters[TEST_PARAM] = TEST_REDIS_URL
         redis = MockRedis()
@@ -37,28 +39,53 @@ class TestMain(unittest.TestCase):
 
 
 class MockAWS:
+    """ """
     def __init__(self):
         self.ssm_parameters = {}
         self.cloudwatch_metrics = []
 
     def ssm_get_parameter(self, *args, **kwargs):
+        """
+
+        :param *args: 
+        :param **kwargs: 
+
+        """
         name = kwargs.get("Name")
         value = self.ssm_parameters[name]
 
         return {"Parameter": {"Value": value}}
 
     def cloudwatch_put_metric_data(self, *args, **kwargs):
+        """
+
+        :param *args: 
+        :param **kwargs: 
+
+        """
         self.cloudwatch_metrics.append(kwargs)
 
 
 class MockRedis:
+    """ """
     def __init__(self):
         self.llens = {}
 
     def setup(self, *args, **kwargs):
+        """
+
+        :param *args: 
+        :param **kwargs: 
+
+        """
         pass
 
     def llen(self, queue):
+        """
+
+        :param queue: 
+
+        """
         return self.llens[queue]
 
 

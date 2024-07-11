@@ -10,35 +10,72 @@ from redis import Redis as RealRedis
 
 
 class AWS:
+    """ """
     def ssm_get_parameter(self, *args, **kwargs):
+        """
+
+        :param *args: 
+        :param **kwargs: 
+
+        """
         ssm = boto3.client("ssm")
 
         return ssm.get_parameter(*args, **kwargs)
 
     def cloudwatch_put_metric_data(self, *args, **kwargs):
+        """
+
+        :param *args: 
+        :param **kwargs: 
+
+        """
         cw = boto3.client("cloudwatch")
 
         return cw.put_metric_data(*args, **kwargs)
 
 
 class Redis:
+    """ """
     def setup(self, *args, **kwargs):
+        """
+
+        :param *args: 
+        :param **kwargs: 
+
+        """
         if self.redis is None:
             self.redis = RealRedis(*args, **kwargs)
 
         return self
 
     def llen(self, queue):
+        """
+
+        :param queue: 
+
+        """
         return self.redis.llen(queue)
 
 
 def copy_event_to_message(_logger, _log_method, event_dict):
+    """
+
+    :param _logger: 
+    :param _log_method: 
+    :param event_dict: 
+
+    """
     event_dict["message"] = event_dict["event"]
 
     return event_dict
 
 
 def get_logger(log_level_str):
+    """
+
+    :param log_level_str: 
+
+    """
     processors = [
         structlog.processors.add_log_level,
         structlog.processors.StackInfoRenderer(),
@@ -66,6 +103,12 @@ def get_logger(log_level_str):
 
 
 def handler(event, context):
+    """
+
+    :param event: 
+    :param context: 
+
+    """
     env = os.environ.get("ENV", "prod")
     queue = os.environ.get("QUEUE", "restyled:agent:webhooks")
     log_level = os.environ.get("LOG_LEVEL", "info")
@@ -83,6 +126,15 @@ def handler(event, context):
 
 
 def handler_(aws, redis, env, queue, logger):
+    """
+
+    :param aws: 
+    :param redis: 
+    :param env: 
+    :param queue: 
+    :param logger: 
+
+    """
     dimensions = [
         {"Name": "Environment", "Value": env},
         {"Name": "QueueName", "Value": queue},
@@ -127,6 +179,12 @@ def handler_(aws, redis, env, queue, logger):
 
 
 def get_redis_url(aws, env):
+    """
+
+    :param aws: 
+    :param env: 
+
+    """
     token_parameter_name = "/restyled/%s/redis-url" % env
     token_parameter = aws.ssm_get_parameter(Name=token_parameter_name)
 
