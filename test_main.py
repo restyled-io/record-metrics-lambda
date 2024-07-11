@@ -9,6 +9,7 @@ TEST_REDIS_URL = "http://redis.restyled.com:6379/1"
 
 
 class TestMain(unittest.TestCase):
+
     def test_handler(self):
         aws = MockAWS()
         aws.ssm_parameters[TEST_PARAM] = TEST_REDIS_URL
@@ -17,19 +18,26 @@ class TestMain(unittest.TestCase):
         logger = main.get_logger("ERROR")
         expected_metric = {
             "Dimensions": [
-                {"Name": "Environment", "Value": TEST_ENV},
-                {"Name": "QueueName", "Value": TEST_QUEUE},
+                {
+                    "Name": "Environment",
+                    "Value": TEST_ENV
+                },
+                {
+                    "Name": "QueueName",
+                    "Value": TEST_QUEUE
+                },
             ],
-            "MetricName": "QueueDepth",
-            "Unit": "Count",
-            "Value": 3,
+            "MetricName":
+            "QueueDepth",
+            "Unit":
+            "Count",
+            "Value":
+            3,
         }
-        expected_metrics = [
-            {
-                "MetricData": [expected_metric],
-                "Namespace": "Restyled",
-            }
-        ]
+        expected_metrics = [{
+            "MetricData": [expected_metric],
+            "Namespace": "Restyled",
+        }]
 
         result = main.handler_(aws, redis, TEST_ENV, TEST_QUEUE, logger)
 
@@ -37,6 +45,7 @@ class TestMain(unittest.TestCase):
 
 
 class MockAWS:
+
     def __init__(self):
         self.ssm_parameters = {}
         self.cloudwatch_metrics = []
@@ -52,6 +61,7 @@ class MockAWS:
 
 
 class MockRedis:
+
     def __init__(self):
         self.llens = {}
 
