@@ -47,8 +47,8 @@ class MockAWS:
     def ssm_get_parameter(self, *args, **kwargs):
         """
 
-        :param *args: 
-        :param **kwargs: 
+        :param *args:
+        :param **kwargs:
 
         """
         name = kwargs.get("Name")
@@ -59,8 +59,8 @@ class MockAWS:
     def cloudwatch_put_metric_data(self, *args, **kwargs):
         """
 
-        :param *args: 
-        :param **kwargs: 
+        :param *args:
+        :param **kwargs:
 
         """
         self.cloudwatch_metrics.append(kwargs)
@@ -74,8 +74,8 @@ class MockRedis:
     def setup(self, *args, **kwargs):
         """
 
-        :param *args: 
-        :param **kwargs: 
+        :param *args:
+        :param **kwargs:
 
         """
         pass
@@ -83,7 +83,7 @@ class MockRedis:
     def llen(self, queue):
         """
 
-        :param queue: 
+        :param queue:
 
         """
         return self.llens[queue]
