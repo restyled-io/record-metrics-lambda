@@ -11,6 +11,7 @@ from redis import Redis as RealRedis
 
 class AWS:
     """ """
+
     def ssm_get_parameter(self, *args, **kwargs):
         """
 
@@ -36,6 +37,7 @@ class AWS:
 
 class Redis:
     """ """
+
     def setup(self, *args, **kwargs):
         """
 
@@ -136,8 +138,14 @@ def handler_(aws, redis, env, queue, logger):
 
     """
     dimensions = [
-        {"Name": "Environment", "Value": env},
-        {"Name": "QueueName", "Value": queue},
+        {
+            "Name": "Environment",
+            "Value": env
+        },
+        {
+            "Name": "QueueName",
+            "Value": queue
+        },
     ]
 
     url = get_redis_url(aws, env)
@@ -165,14 +173,12 @@ def handler_(aws, redis, env, queue, logger):
 
     aws.cloudwatch_put_metric_data(
         Namespace="Restyled",
-        MetricData=[
-            {
-                "MetricName": "QueueDepth",
-                "Value": depth,
-                "Unit": "Count",
-                "Dimensions": dimensions,
-            }
-        ],
+        MetricData=[{
+            "MetricName": "QueueDepth",
+            "Value": depth,
+            "Unit": "Count",
+            "Dimensions": dimensions,
+        }],
     )
 
     return {"ok": True, "env": env, "queue": queue, "depth": depth}
