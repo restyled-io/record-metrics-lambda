@@ -18,11 +18,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: extractions/setup-just@v1
       - uses: actions/setup-python@v2
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - run: python test_main.py
+      - run: just test
 
   artifact:
     runs-on: ubuntu-latest
@@ -34,10 +35,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: extractions/setup-just@v1
       - uses: actions/setup-python@v2
         with:
           python-version: '3.12'
-      - run: make setup dist/lambda.zip
+      - run: just setup dist
       - id: artifact
         run: |
           key=src/record-metrics/${{ github.sha }}.zip
