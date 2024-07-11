@@ -9,7 +9,7 @@ test:
 
 # Build the dist payload
 dist:
-  [[ -d .venv ]] || just venv
+  [ -d .venv ] || just venv
   rm -rf dist/*
   mkdir -p dist
   cp main.py dist/
