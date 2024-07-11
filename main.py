@@ -24,6 +24,9 @@ class AWS:
 
 class Redis:
 
+    def __init__(self):
+        self.redis = None
+
     def setup(self, *args, **kwargs):
         if self.redis is None:
             self.redis = RealRedis(*args, **kwargs)
