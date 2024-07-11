@@ -4,9 +4,9 @@ import os
 from urllib.parse import urlparse
 
 import boto3
-from redis import Redis as RealRedis
 import requests
 import structlog
+from redis import Redis as RealRedis
 
 
 class AWS:
