@@ -5,7 +5,7 @@ venv:
 
 # Run project tests
 test:
-  AWS_PROFILE=restyled-ci LOG_LEVEL=error python test_main.py
+  pytest
 
 # Build the dist payload
 dist:
