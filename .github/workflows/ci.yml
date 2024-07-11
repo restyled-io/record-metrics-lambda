@@ -43,7 +43,7 @@ jobs:
         run: |
           key=src/record-metrics/${{ github.sha }}.zip
           aws s3 cp --acl public-read dist/lambda.zip "s3://infra.restyled.io/$key"
-          echo "::set-output name=key::$key"
+          printf 'key=%s\n' "$key" >>"$GITHUB_OUTPUT"
 
     outputs:
       key: ${{ steps.artifact.outputs.key }}
