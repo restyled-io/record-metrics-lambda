@@ -12,7 +12,7 @@ packaging==24.1
 python-dateutil==2.9.0.post0
 redis==5.1.1
 requests==2.32.3
-s3transfer==0.10.2
+s3transfer==0.10.3
 six==1.16.0
 structlog==24.4.0
 urllib3==2.2.3
